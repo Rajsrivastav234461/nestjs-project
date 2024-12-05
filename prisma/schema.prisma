@@ -1,0 +1,43 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      Role
+  posts     Post[]   // One-to-many relation: A user can have many posts
+  comments  Comment[] // One-to-many relation: A user can have many comments
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])  // Relation with User
+  comments  Comment[] // One-to-many relation: A post can have many comments
+}
+
+model Comment {
+  id        Int     @id @default(autoincrement())
+  content   String  // The content of the comment
+  userId    Int     // The user who created the comment
+  postId    Int     // The post on which the comment was made
+  user      User    @relation(fields: [userId], references: [id])  // Relation with User
+  post      Post    @relation(fields: [postId], references: [id])  // Relation with Post
+}
+
+enum Role { 
+  USER
+  ADMIN
+}
